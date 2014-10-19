@@ -14,9 +14,9 @@
 #define TEMP A5
 #define LIGHT A2
 #define GAS A3
-//#define FRONT_DIST A3
+#define FRONT_DIST A3
 #define LEFT_DIST A1
-//#define RIGHT_DIST A0
+#define RIGHT_DIST A0
 #define BACK_DIST A4
 #define FRONT 0
 #define LEFT 1
@@ -125,7 +125,7 @@ void wait(int interval, int sensor)
     {
       ADC_buff[5] = ReadTemp();
       Serial.print("Room temperature: ");
-      Serial.println(ADC_buff[5]);
+      Serial.println(ReadTemp());
     }
     else if (sensor == EchoSensor)
     {
@@ -142,8 +142,8 @@ void wait(int interval, int sensor)
       //Buzz(1);
      // delay(5000);
       //Buzz(0);
-      delay(2000);
-      a =(int) Serial.read()-48;Serial.println(a);
+      a =(int) Serial.read()-48;
+      //Serial.println(a);
       decodeRequest(a);
     }
   }
@@ -153,46 +153,66 @@ void decodeRequest(int request)
 {
 static int c;
 
+int gas;
       //  Buzz(1);
     
   if(previousRequest != request)
   {
-    Serial.println(c);
      //Buzz(1);
     previousRequest = request;
+    
     switch(request)
     {
       case 1:
-      c++;
+     
     
       //Buzz(1);
       LeftMotor(0,254);
       RightMotor(0,254);
       break;
       case 2:
-      c++;
+     
 
       LeftMotor(1,254);
       RightMotor(1,254);
       break;
       case 3:
-      c++;
+      
                   
-      LeftMotor(0,254);
-      RightMotor(1,254);
-      break;
-      case 4:
-      c++;
-
       LeftMotor(1,254);
       RightMotor(0,254);
       break;
+      case 4:
+      
+
+      LeftMotor(0,254);
+      RightMotor(1,254);
+      break;
       
       case 5:
-      c++;
       
       LeftMotor(0, 0);
       RightMotor(0, 0);
+      
+      break;
+      case 6:
+      Serial.print("Light intensiti: ");
+      Serial.println(ReadLight());
+      break;
+      case 9:
+      Serial.print("Room temperature: ");
+      Serial.println(ReadTemp());
+      break;
+      case 7:
+      gas = ReadGas();
+      Serial.print("Gas concentration: ");
+      Serial.println(gas);
+      if(gas > 600){
+      Buzz(1);
+      }else {
+      Buzz(0);
+      }
+      break;
       
       default:
        
@@ -258,14 +278,12 @@ void LeftMotor(char dir, unsigned char speed)
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     analogWrite(LEFT_SPEED, speed);
-    Serial.println("LeftMotorForward");
   }
   else
   {
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);
     analogWrite(LEFT_SPEED, speed);
-     Serial.println("LeftMotorBackward");
   }     
 }
 
@@ -278,26 +296,23 @@ void RightMotor(char dir, unsigned char speed)
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
     analogWrite(RIGHT_SPEED, speed);
-     Serial.println("RightMotorForward");
   }
   else
   {
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
     analogWrite(RIGHT_SPEED, speed);
-     Serial.println("RightMotorBackward");
   }     
 }
 
 int ReadTemp()
 {
-    int sensorValue;
-    int T;
-    
-    sensorValue = analogRead(TEMP) ;
-    T = (((sensorValue*5)/1024)*100)-274;
-    
-    return T;
+  int t = analogRead(A5);
+  int j;
+  j = (((5*t)/1024)*100)-274;
+
+  return j;
+
 }
 
 
@@ -387,13 +402,14 @@ delay(2000);
 //    Serial.println(c);
 //  
 //  delay(1000);
-//wait(50,A0);
+
+//wait(1000,A5);
 //wait(70,A1);
 //wait(80,A4);
 //wait(20,A5);
 //wait(90,A2);
-wait(1000,A5);
-//wait(50,20);
+//wait(15,20);
+wait(10,20);
 /*echo();
  //Delay 50ms before next reading.
  delay(50);
